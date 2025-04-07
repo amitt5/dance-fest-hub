@@ -57,6 +57,8 @@ export default function EventForm({ initialData }: EventFormProps) {
   const [newArtist, setNewArtist] = useState("")
   const [allArtists, setAllArtists] = useState<Artist[]>([])
   const [isLoadingArtists, setIsLoadingArtists] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchArtists = async () => {
@@ -166,18 +168,51 @@ export default function EventForm({ initialData }: EventFormProps) {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
+    setError(null)
 
-    // In a real app, you would send this data to your API
-    console.log("Submitting form data:", formData)
+    try {
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          startDate: startDate?.toISOString().split('T')[0],
+          endDate: endDate?.toISOString().split('T')[0],
+          city: formData.city,
+          country: formData.country,
+          website: formData.website || null,
+          description: formData.description || null,
+          posterUrl: formData.image !== '/placeholder.svg?height=400&width=600' ? formData.image : null,
+          facebookLink: formData.facebookPage || null,
+          instagramLink: formData.instagramPage || null,
+        }),
+      })
 
-    // Navigate back to the homepage
-    router.push("/")
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to create event')
+      }
+
+      router.push('/events') // Redirect to events page after successful creation
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
+      {error && (
+        <div className="bg-destructive/15 text-destructive px-4 py-2 rounded-md">
+          {error}
+        </div>
+      )}
       <div className="space-y-4">
         <div>
           <Label htmlFor="name" className="text-white">
@@ -449,8 +484,12 @@ export default function EventForm({ initialData }: EventFormProps) {
         >
           Cancel
         </Button>
-        <Button type="submit" className="bg-primary hover:bg-primary/90">
-          Submit
+        <Button 
+          type="submit" 
+          disabled={isSubmitting}
+          className="bg-primary hover:bg-primary/90"
+        >
+          {isSubmitting ? 'Saving...' : 'Save Event'}
         </Button>
       </div>
     </form>
