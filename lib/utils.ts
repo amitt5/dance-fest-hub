@@ -9,8 +9,13 @@ export function formatDateRange(startDate: string, endDate: string): string {
   const start = new Date(startDate)
   const end = new Date(endDate)
 
-  const startMonth = start.toLocaleString("default", { month: "short" })
-  const endMonth = end.toLocaleString("default", { month: "short" })
+  const months = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ]
+
+  const startMonth = months[start.getMonth()]
+  const endMonth = months[end.getMonth()]
 
   const startDay = start.getDate()
   const endDay = end.getDate()
