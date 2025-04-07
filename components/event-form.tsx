@@ -15,6 +15,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
 import { CalendarIcon, X, Facebook, Instagram } from "lucide-react"
+import { COUNTRIES, DANCE_STYLES } from "@/lib/constants"
 
 interface EventFormProps {
   initialData?: Festival
@@ -24,9 +25,6 @@ interface Artist {
   id: string
   name: string
 }
-
-const danceStyles = ["Bachata", "Salsa", "Kizomba", "Zouk"]
-const countries = ["USA", "Spain", "France", "Italy", "Germany", "Mexico", "Brazil", "Canada"]
 
 export default function EventForm({ initialData }: EventFormProps) {
   const router = useRouter()
@@ -269,7 +267,7 @@ export default function EventForm({ initialData }: EventFormProps) {
                 <SelectValue placeholder="Select country" />
               </SelectTrigger>
               <SelectContent className="bg-secondary border-border">
-                {countries.map((country) => (
+                {COUNTRIES.map((country) => (
                   <SelectItem key={country} value={country}>
                     {country}
                   </SelectItem>
@@ -346,7 +344,7 @@ export default function EventForm({ initialData }: EventFormProps) {
         <div>
           <Label className="text-white">Dance Styles</Label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
-            {danceStyles.map((style) => (
+            {DANCE_STYLES.map((style) => (
               <div key={style} className="flex items-center space-x-2">
                 <Checkbox
                   id={`style-${style}`}
