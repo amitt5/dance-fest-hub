@@ -1,14 +1,34 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Menu, X } from "lucide-react"
+import { Menu, X, LogOut } from "lucide-react"
+import { supabase } from '@/lib/supabaseClient'
+import { User, AuthChangeEvent, Session } from '@supabase/supabase-js'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    // Get initial auth state
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+    })
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+  }
 
   return (
     <header className="bg-background border-b border-border">
@@ -30,13 +50,19 @@ export default function Header() {
           <Link href="/add-event" className="text-white hover:text-primary">
             Add Event
           </Link>
-          {isLoggedIn ? (
-            <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
-                <AvatarFallback>U</AvatarFallback>
-              </Avatar>
-              <span className="font-medium">User</span>
+          {user ? (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user.user_metadata.avatar_url || "/placeholder.svg?height=32&width=32"} alt={user.user_metadata.full_name || "User"} />
+                  <AvatarFallback>{(user.user_metadata.full_name || "User").charAt(0)}</AvatarFallback>
+                </Avatar>
+                <span className="font-medium text-white">{user.user_metadata.full_name || user.email}</span>
+              </div>
+              <Button variant="outline" size="sm" onClick={handleLogout} className="text-white">
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
             </div>
           ) : (
             <Link href="/auth">
@@ -59,13 +85,19 @@ export default function Header() {
               >
                 Add Event
               </Link>
-              {isLoggedIn ? (
-                <div className="flex items-center gap-2 py-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
-                    <AvatarFallback>U</AvatarFallback>
-                  </Avatar>
-                  <span className="font-medium">User</span>
+              {user ? (
+                <div className="flex flex-col gap-4 py-2">
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.user_metadata.avatar_url || "/placeholder.svg?height=32&width=32"} alt={user.user_metadata.full_name || "User"} />
+                      <AvatarFallback>{(user.user_metadata.full_name || "User").charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium text-white">{user.user_metadata.full_name || user.email}</span>
+                  </div>
+                  <Button variant="outline" onClick={handleLogout} className="text-white">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </Button>
                 </div>
               ) : (
                 <Link href="/auth" className="py-2" onClick={() => setIsMenuOpen(false)}>
