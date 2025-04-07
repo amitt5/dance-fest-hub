@@ -1,5 +1,5 @@
 // Dance styles supported by the platform
-export const DANCE_STYLES = ["Bachata", "Salsa", "Kizomba", "Zouk"] as const
+export const DANCE_STYLES = ["bachata", "salsa", "kizomba", "zouk"] as const
 
 // List of countries where dance festivals are commonly held
 export const COUNTRIES = [

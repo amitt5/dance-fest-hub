@@ -190,6 +190,8 @@ export default function EventForm({ initialData }: EventFormProps) {
           posterUrl: formData.image !== '/placeholder.svg?height=400&width=600' ? formData.image : null,
           facebookLink: formData.facebookPage || null,
           instagramLink: formData.instagramPage || null,
+          artists: formData.artists || [],
+          styles: formData.styles || [],
         }),
       })
 
@@ -198,8 +200,12 @@ export default function EventForm({ initialData }: EventFormProps) {
         throw new Error(data.error || 'Failed to create event')
       }
 
-      router.push('/events') // Redirect to events page after successful creation
+      const data = await response.json()
+      console.log('Created event:', data)
+
+      router.push('/events')
     } catch (err) {
+      console.error('Error details:', err)
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setIsSubmitting(false)
