@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,18 +20,13 @@ interface EventFormProps {
   initialData?: Festival
 }
 
+interface Artist {
+  id: string
+  name: string
+}
+
 const danceStyles = ["Bachata", "Salsa", "Kizomba", "Zouk"]
 const countries = ["USA", "Spain", "France", "Italy", "Germany", "Mexico", "Brazil", "Canada"]
-const allArtists = [
-  "DJ Mambo",
-  "Maria & Carlos",
-  "Bachata Sensual Team",
-  "Salsa Kings",
-  "Kizomba Fusion",
-  "Zouk Masters",
-  "Latin Vibes Crew",
-  "Bachata Passion",
-]
 
 export default function EventForm({ initialData }: EventFormProps) {
   const router = useRouter()
@@ -62,6 +57,27 @@ export default function EventForm({ initialData }: EventFormProps) {
   )
 
   const [newArtist, setNewArtist] = useState("")
+  const [allArtists, setAllArtists] = useState<Artist[]>([])
+  const [isLoadingArtists, setIsLoadingArtists] = useState(true)
+
+  useEffect(() => {
+    const fetchArtists = async () => {
+      try {
+        const response = await fetch('/api/artists')
+        if (!response.ok) {
+          throw new Error('Failed to fetch artists')
+        }
+        const data = await response.json()
+        setAllArtists(data)
+      } catch (error) {
+        console.error('Error fetching artists:', error)
+      } finally {
+        setIsLoadingArtists(false)
+      }
+    }
+
+    fetchArtists()
+  }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -78,12 +94,12 @@ export default function EventForm({ initialData }: EventFormProps) {
     })
   }
 
-  const handleArtistChange = (artist: string) => {
+  const handleArtistChange = (artistName: string) => {
     setFormData((prev) => {
       const artists = prev.artists || []
       return {
         ...prev,
-        artists: artists.includes(artist) ? artists.filter((a) => a !== artist) : [...artists, artist],
+        artists: artists.includes(artistName) ? artists.filter((a) => a !== artistName) : [...artists, artistName],
       }
     })
   }
@@ -105,13 +121,18 @@ export default function EventForm({ initialData }: EventFormProps) {
         throw new Error('Failed to save artist')
       }
 
+      const savedArtist = await response.json()
+      
+      // Update allArtists state with the new artist
+      setAllArtists(prev => [...prev, savedArtist])
+
       // Update form data with new artist
       setFormData((prev) => {
         const artists = prev.artists || []
-        if (!artists.includes(newArtist)) {
+        if (!artists.includes(savedArtist.name)) {
           return {
             ...prev,
-            artists: [...artists, newArtist],
+            artists: [...artists, savedArtist.name],
           }
         }
         return prev
@@ -120,7 +141,6 @@ export default function EventForm({ initialData }: EventFormProps) {
       setNewArtist("")
     } catch (error) {
       console.error('Error saving artist:', error)
-      // You might want to show an error message to the user here
     }
   }
 
@@ -344,21 +364,25 @@ export default function EventForm({ initialData }: EventFormProps) {
 
         <div>
           <Label className="text-white">Artists & DJs</Label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
-            {allArtists.map((artist) => (
-              <div key={artist} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`artist-${artist}`}
-                  checked={(formData.artists || []).includes(artist)}
-                  onCheckedChange={() => handleArtistChange(artist)}
-                  className="border-white data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                />
-                <Label htmlFor={`artist-${artist}`} className="text-sm font-normal cursor-pointer text-white">
-                  {artist}
-                </Label>
-              </div>
-            ))}
-          </div>
+          {isLoadingArtists ? (
+            <div className="text-center py-4 text-muted-foreground">Loading artists...</div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+              {allArtists.map((artist) => (
+                <div key={artist.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`artist-${artist.id}`}
+                    checked={(formData.artists || []).includes(artist.name)}
+                    onCheckedChange={() => handleArtistChange(artist.name)}
+                    className="border-white data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  />
+                  <Label htmlFor={`artist-${artist.id}`} className="text-sm font-normal cursor-pointer text-white">
+                    {artist.name}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="flex items-center space-x-2 mt-4">
             <Input
