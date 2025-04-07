@@ -7,20 +7,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Facebook, Instagram } from "lucide-react"
 import { supabase } from '../../lib/supabaseClient'
 
-
 export default function AuthPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleLogin = async () => {
-  // const handleLogin = async (provider: "facebook" | "google") => {
+  const handleLogin = async (provider: "facebook" | "google") => {
     try {
       setIsLoading(true)
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'facebook',
-        // options: {
-        //   redirectTo: `${window.location.origin}/auth/callback`
-        // }
+        provider: provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          scopes: provider === 'facebook' ? 'email,public_profile' : undefined
+        }
       })
 
       if (error) throw error
