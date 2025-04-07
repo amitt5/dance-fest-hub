@@ -88,21 +88,40 @@ export default function EventForm({ initialData }: EventFormProps) {
     })
   }
 
-  const handleAddNewArtist = () => {
+  const handleAddNewArtist = async () => {
     if (!newArtist.trim()) return
 
-    setFormData((prev) => {
-      const artists = prev.artists || []
-      if (!artists.includes(newArtist)) {
-        return {
-          ...prev,
-          artists: [...artists, newArtist],
-        }
-      }
-      return prev
-    })
+    try {
+      // Save artist to database
+      const response = await fetch('/api/artists', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: newArtist.trim() }),
+      })
 
-    setNewArtist("")
+      if (!response.ok) {
+        throw new Error('Failed to save artist')
+      }
+
+      // Update form data with new artist
+      setFormData((prev) => {
+        const artists = prev.artists || []
+        if (!artists.includes(newArtist)) {
+          return {
+            ...prev,
+            artists: [...artists, newArtist],
+          }
+        }
+        return prev
+      })
+
+      setNewArtist("")
+    } catch (error) {
+      console.error('Error saving artist:', error)
+      // You might want to show an error message to the user here
+    }
   }
 
   const handleRemoveArtist = (artist: string) => {
