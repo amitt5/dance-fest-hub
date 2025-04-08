@@ -333,37 +333,42 @@ export default function EventForm({ initialData }: EventFormProps) {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Social Media Links */}
+        <div className="space-y-4">
           <div>
-            <Label htmlFor="facebookPage" className="text-white flex items-center">
-              <Facebook className="h-4 w-4 mr-2 text-blue-500" />
-              Facebook Page
+            <Label htmlFor="facebookPage" className="text-white">
+              Facebook Event Page (Optional)
             </Label>
-            <Input
-              id="facebookPage"
-              name="facebookPage"
-              value={formData.facebookPage}
-              onChange={handleInputChange}
-              type="url"
-              placeholder="https://facebook.com/yourevent"
-              className="bg-secondary border-border"
-            />
+            <div className="relative">
+              <Facebook className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="facebookPage"
+                name="facebookPage"
+                type="url"
+                placeholder="https://facebook.com/events/..."
+                value={formData.facebookPage || ''}
+                onChange={handleInputChange}
+                className="pl-8 bg-secondary border-border"
+              />
+            </div>
           </div>
 
           <div>
-            <Label htmlFor="instagramPage" className="text-white flex items-center">
-              <Instagram className="h-4 w-4 mr-2 text-pink-500" />
-              Instagram Page
+            <Label htmlFor="instagramPage" className="text-white">
+              Instagram Page (Optional)
             </Label>
-            <Input
-              id="instagramPage"
-              name="instagramPage"
-              value={formData.instagramPage}
-              onChange={handleInputChange}
-              type="url"
-              placeholder="https://instagram.com/yourevent"
-              className="bg-secondary border-border"
-            />
+            <div className="relative">
+              <Instagram className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="instagramPage"
+                name="instagramPage"
+                type="url"
+                placeholder="https://instagram.com/..."
+                value={formData.instagramPage || ''}
+                onChange={handleInputChange}
+                className="pl-8 bg-secondary border-border"
+              />
+            </div>
           </div>
         </div>
 
