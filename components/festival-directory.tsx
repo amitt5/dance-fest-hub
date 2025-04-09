@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -9,11 +9,33 @@ import FestivalList from "@/components/festival-list"
 import FestivalGrid from "@/components/festival-grid"
 import { ListFilter, Grid, List } from "lucide-react"
 import { DANCE_STYLES, MONTHS } from "@/lib/constants"
+
+
+interface Event {
+  id: string
+  name: string
+  start_date: string
+  end_date: string
+  city: string
+  country: string
+  website?: string
+  facebook_link?: string
+  instagram_link?: string
+  description?: string
+  poster_url?: string
+  created_by?: string
+  created_at: string
+  event_styles: { style: string }[]
+  event_artists: { artist: { id: string, name: string } }[]
+}
+
 export default function FestivalDirectory({
   initialFestivals,
 }: {
   initialFestivals: Festival[]
 }) {
+  const [events, setEvents] = useState<Event[]>([])
+  const [isLoadingEvents, setIsLoadingEvents] = useState(true)
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid")
   const [festivals, setFestivals] = useState<Festival[]>(initialFestivals)
   const [filters, setFilters] = useState({
@@ -27,6 +49,28 @@ export default function FestivalDirectory({
   const countries = Array.from(new Set(initialFestivals.map((f) => f.country)))
   
   const artists = Array.from(new Set(initialFestivals.flatMap((f) => f.artists)))
+
+  // Fetch events on component mount
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch('/api/events')
+        if (!response.ok) {
+          throw new Error('Failed to fetch events')
+        }
+        const data = await response.json()
+        setEvents(data)
+        console.log('events', data, events)
+      } catch (error) {
+        console.error('Error fetching events:', error)
+      } finally {
+        setIsLoadingEvents(false)
+      }
+    }
+
+    fetchEvents()
+  }, [])
+
 
   const handleStyleChange = (style: string) => {
     setFilters((prev) => {
