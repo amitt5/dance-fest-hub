@@ -20,7 +20,8 @@ export default async function FestivalPage({
 }: {
   params: { id: string }
 }) {
-  const festival = await getEventById(params.id)
+  // const festival = await getEventById(params.id)
+  const festival = await getEventById("1")
 
   if (!festival) {
     notFound()
