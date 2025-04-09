@@ -41,7 +41,7 @@ export default function FestivalGrid({ festivals }: { festivals: Event[] }) {
                     {festival.name}
                   </h3>
                 </Link>
-                <StarRating rating={festival.rating} />
+                <StarRating rating={festival.rating || 0} />
               </div>
 
               <p className="text-sm text-muted-foreground">{formatDateRange(festival.start_date, festival.end_date)}</p>

@@ -15,6 +15,8 @@ export interface Event {
   created_at: string
   event_styles: { style: string }[]
   event_artists: { artist: { id: string, name: string } }[]
+  attendeeCount?: number
+  rating?: number
 }
 
 export type ReportReason = "duplicate" | "not-exist" | "cancelled" | "incorrect-info" | "other"
