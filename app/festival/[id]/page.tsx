@@ -18,12 +18,10 @@ import { SocialLinks } from "@/components/social-links"
 import { ReportButton } from "@/components/report-button"
 import { useEventsStore } from "@/lib/store/events-store"
 import { Event } from "@/lib/types"
+import { use } from 'react'
 
-export default function FestivalPage({
-  params,
-}: {
-  params: { id: string }
-}) {
+export default function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
+  const {id} = use(params)
   const [festival, setFestival] = useState<Event | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -31,8 +29,7 @@ export default function FestivalPage({
   // Use the Zustand store
   const { events, getEventById, fetchEvents } = useEventsStore()
   
-  // Extract the ID
-  const id = params.id
+  
   
   useEffect(() => {
     const loadEvent = async () => {

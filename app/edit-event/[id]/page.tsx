@@ -7,12 +7,10 @@ import { Button } from "@/components/ui/button"
 import { useEventsStore } from "@/lib/store/events-store"
 import { Event } from "@/lib/types"
 import EventForm from "@/components/event-form"
+import { use } from 'react'
 
-export default function EditEventPage({
-  params,
-}: {
-  params: { id: string }
-}) {
+export default function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
+
   const [festival, setFestival] = useState<Event | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -21,8 +19,8 @@ export default function EditEventPage({
   const { events, getEventById, fetchEvents } = useEventsStore()
   
   // Extract the ID
-  const id = params.id
-  
+  const { id } = use(params)  // ✅ unwrap the promise
+
   useEffect(() => {
     const loadEvent = async () => {
       setIsLoading(true)
