@@ -4,30 +4,13 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import type { Festival } from "@/lib/types"
+import type { Festival,Event } from "@/lib/types"
 import FestivalList from "@/components/festival-list"
 import FestivalGrid from "@/components/festival-grid"
 import { ListFilter, Grid, List } from "lucide-react"
 import { DANCE_STYLES, MONTHS } from "@/lib/constants"
 
 
-interface Event {
-  id: string
-  name: string
-  start_date: string
-  end_date: string
-  city: string
-  country: string
-  website?: string
-  facebook_link?: string
-  instagram_link?: string
-  description?: string
-  poster_url?: string
-  created_by?: string
-  created_at: string
-  event_styles: { style: string }[]
-  event_artists: { artist: { id: string, name: string } }[]
-}
 
 export default function FestivalDirectory({
   initialFestivals,
