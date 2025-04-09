@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns"
 import { CalendarIcon, X, FacebookIcon, Instagram } from "lucide-react"
 import { COUNTRIES, DANCE_STYLES } from "@/lib/constants"
+import { supabase } from "@/lib/supabaseClient"
 
 interface EventFormProps {
   initialData?: Event
@@ -60,6 +61,20 @@ export default function EventForm({ initialData }: EventFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [selectedStyles, setSelectedStyles] = useState<string[]>([])
   const [selectedArtists, setSelectedArtists] = useState<string[]>([])
+
+
+  // Check for session on component mount
+  useEffect(() => {
+    const checkSession = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session) {
+        router.push('/auth')
+      }
+    }
+    
+    checkSession()
+  }, [router, supabase.auth])
 
   useEffect(() => {
     const fetchArtists = async () => {

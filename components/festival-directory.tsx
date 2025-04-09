@@ -11,8 +11,7 @@ import { ListFilter, Grid, List } from "lucide-react"
 import { DANCE_STYLES, MONTHS } from "@/lib/constants"
 import { useEventsStore } from "@/lib/store/events-store"
 import { useToast } from "@/hooks/use-toast"
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-
+import { supabase } from "@/lib/supabaseClient"
 export default function FestivalDirectory() {
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid")
   const [festivals, setFestivals] = useState<Event[]>([])
@@ -26,7 +25,6 @@ export default function FestivalDirectory() {
   // Use the Zustand store
   const { events, isLoading, error, fetchEvents } = useEventsStore()
   const { toast } = useToast()
-  const supabase = createClientComponentClient()
 
   // Fetch events on component mount
   useEffect(() => {
