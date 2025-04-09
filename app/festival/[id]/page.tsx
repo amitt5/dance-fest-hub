@@ -47,27 +47,27 @@ export default async function FestivalPage({
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
         <div className="md:col-span-1">
-          <img src={festival.image || "/placeholder.svg"} alt={festival.name} className="w-full rounded-lg shadow-md" />
+          <img src={festival.poster_url || "/placeholder.svg"} alt={festival.name} className="w-full rounded-lg shadow-md" />
         </div>
 
         <div className="md:col-span-2 space-y-4">
           <h1 className="text-3xl font-bold text-white">{festival.name}</h1>
 
           <div className="flex items-center space-x-2">
-            <StarRating rating={festival.rating} size="lg" />
-            <span className="text-muted-foreground">({festival.rating.toFixed(1)})</span>
+            <StarRating rating={festival.rating || 0} size="lg" />
+            <span className="text-muted-foreground">({festival.rating?.toFixed(1)})</span>
           </div>
 
-          <p className="text-lg font-medium text-white">{formatDateRange(festival.startDate, festival.endDate)}</p>
+          <p className="text-lg font-medium text-white">{formatDateRange(festival.start_date, festival.end_date)}</p>
 
           <p className="text-lg text-white">
             {festival.city}, {festival.country}
           </p>
 
           <div className="flex flex-wrap gap-2">
-            {festival.styles.map((style) => (
-              <Badge key={style} className="bg-primary text-white hover:bg-primary/90">
-                {style}
+            {festival.event_styles.map((style) => (
+              <Badge key={style.style} className="bg-primary text-white hover:bg-primary/90">
+                {style.style}
               </Badge>
             ))}
           </div>
@@ -98,13 +98,13 @@ export default async function FestivalPage({
           <div className="pt-2">
             <h3 className="text-lg font-medium mb-2 text-white">Artists & DJs</h3>
             <div className="flex flex-wrap gap-2">
-              {festival.artists.map((artist) => (
-                <div key={artist} className="flex items-center bg-secondary px-3 py-1 rounded-full text-sm">
+              {festival.event_artists.map((artist) => (
+                <div key={artist.artist.id} className="flex items-center bg-secondary px-3 py-1 rounded-full text-sm">
                   <Avatar className="h-6 w-6 mr-2">
-                    <AvatarImage src={`/placeholder.svg?height=24&width=24`} alt={artist} />
-                    <AvatarFallback>{artist.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={`/placeholder.svg?height=24&width=24`} alt={artist.artist.name} />
+                    <AvatarFallback>{artist.artist.name.charAt(0)}</AvatarFallback>
                   </Avatar>
-                  {artist}
+                  {artist.artist.name}
                 </div>
               ))}
             </div>
