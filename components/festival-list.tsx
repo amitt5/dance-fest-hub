@@ -60,7 +60,7 @@ export default function FestivalList({ festivals }: { festivals: Event[] }) {
                 <div className="flex justify-between items-center">
                   <div className="text-sm text-white">
                     <span className="font-medium">Artists: </span>
-                    {festival.event_artists.map((ea) => ea.artist.name).join(", ")}
+                    {festival.event_artists?.map((ea) => ea.artist.name).join(", ")}
                   </div>
 
                   <div className="flex items-center gap-3">

@@ -3,9 +3,6 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { DanceStyle } from '@/lib/constants'
 
-// Define valid styles enum to match database constraint
-const VALID_STYLES = ['bachata', 'salsa', 'kizomba', 'zouk'] as const
-
 export async function GET() {
   try {
     const cookieStore = cookies()

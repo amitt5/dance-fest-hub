@@ -49,7 +49,7 @@ export default function FestivalDirectory() {
   const countries = Array.from(new Set(events.map((f) => f.country)))
   
   const artists = Array.from(new Set(events.flatMap((f) => 
-    f.event_artists.map((ea) => ea.artist.name)
+    f.event_artists?.map((ea) => ea.artist.name)
   )))
 
   const handleStyleChange = (style: string) => {

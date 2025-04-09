@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { StarRating } from "@/components/star-rating"
-import { getEventById } from "@/lib/data"
 import { formatDateRange } from "@/lib/utils"
 import { ExternalLink, Edit, Users } from "lucide-react"
 import DiscountCodes from "@/components/discount-codes"
@@ -20,8 +19,26 @@ export default async function FestivalPage({
 }: {
   params: { id: string }
 }) {
-  // const festival = await getEventById(params.id)
-  const festival = await getEventById("1")
+  // Extract the ID and ensure it's properly awaited
+  const id = params.id
+  
+  // Fetch event data from the backend API
+  
+  // const response = await fetch(`/api/events/${id}`, {
+  const response = await fetch(`http://localhost:3000/api/events/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    cache: 'no-store', // Ensure we get fresh data
+  })
+
+  if (!response.ok) {
+    console.error('Failed to fetch event:', await response.text())
+    notFound()
+  }
+
+  const festival = await response.json()
 
   if (!festival) {
     notFound()
@@ -32,7 +49,7 @@ export default async function FestivalPage({
       <div className="flex justify-between items-center mb-6">
         <Link href="/">
           <Button variant="outline" className="border-white text-white hover:bg-secondary/80">
-            ← Back to Events
+            ← Back to Festivals
           </Button>
         </Link>
         <div className="flex gap-2">
@@ -66,7 +83,7 @@ export default async function FestivalPage({
           </p>
 
           <div className="flex flex-wrap gap-2">
-            {festival.event_styles.map((style) => (
+            {festival.event_styles?.map((style: any) => (
               <Badge key={style.style} className="bg-primary text-white hover:bg-primary/90">
                 {style.style}
               </Badge>
@@ -99,7 +116,7 @@ export default async function FestivalPage({
           <div className="pt-2">
             <h3 className="text-lg font-medium mb-2 text-white">Artists & DJs</h3>
             <div className="flex flex-wrap gap-2">
-              {festival.event_artists.map((artist) => (
+              {festival.event_artists?.map((artist: any) => (
                 <div key={artist.artist.id} className="flex items-center bg-secondary px-3 py-1 rounded-full text-sm">
                   <Avatar className="h-6 w-6 mr-2">
                     <AvatarImage src={`/placeholder.svg?height=24&width=24`} alt={artist.artist.name} />
