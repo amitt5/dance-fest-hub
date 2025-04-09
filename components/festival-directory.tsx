@@ -10,15 +10,11 @@ import FestivalGrid from "@/components/festival-grid"
 import { ListFilter, Grid, List } from "lucide-react"
 import { DANCE_STYLES, MONTHS } from "@/lib/constants"
 
-export default function FestivalDirectory({
-  initialFestivals,
-}: {
-  initialFestivals: Event[]
-}) {
+export default function FestivalDirectory() {
   const [events, setEvents] = useState<Event[]>([])
   const [isLoadingEvents, setIsLoadingEvents] = useState(true)
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid")
-  const [festivals, setFestivals] = useState<Event[]>(initialFestivals)
+  const [festivals, setFestivals] = useState<Event[]>([])
   const [filters, setFilters] = useState({
     month: "",
     country: "",
@@ -26,23 +22,19 @@ export default function FestivalDirectory({
     artist: "",
   })
 
-  // Get unique countries, months, and artists for filter dropdowns
-  const countries = Array.from(new Set(initialFestivals.map((f) => f.country)))
-  
-  const artists = Array.from(new Set(initialFestivals.flatMap((f) => 
-    f.event_artists.map((ea) => ea.artist.name)
-  )))
-
   // Fetch events on component mount
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const response = await fetch('/api/events')
+        
         if (!response.ok) {
           throw new Error('Failed to fetch events')
         }
+        
         const data = await response.json()
         setEvents(data)
+        setFestivals(data) // Initialize festivals with fetched data
       } catch (error) {
         console.error('Error fetching events:', error)
       } finally {
@@ -52,6 +44,13 @@ export default function FestivalDirectory({
 
     fetchEvents()
   }, [])
+
+  // Get unique countries, months, and artists for filter dropdowns
+  const countries = Array.from(new Set(events.map((f) => f.country)))
+  
+  const artists = Array.from(new Set(events.flatMap((f) => 
+    f.event_artists.map((ea) => ea.artist.name)
+  )))
 
   const handleStyleChange = (style: string) => {
     setFilters((prev) => {
@@ -63,7 +62,7 @@ export default function FestivalDirectory({
   }
 
   const applyFilters = () => {
-    let filtered = [...initialFestivals]
+    let filtered = [...events]
 
     if (filters.month) {
       filtered = filtered.filter((f) => {
@@ -100,7 +99,7 @@ export default function FestivalDirectory({
       styles: [],
       artist: "",
     })
-    setFestivals(initialFestivals)
+    setFestivals(events)
   }
 
   return (
@@ -232,7 +231,15 @@ export default function FestivalDirectory({
         </Button>
       </div>
 
-      {viewMode === "list" ? <FestivalList festivals={festivals} /> : <FestivalGrid festivals={festivals} />}
+      {isLoadingEvents ? (
+        <div className="text-center py-8">Loading events...</div>
+      ) : festivals.length === 0 ? (
+        <div className="text-center py-8">No events found matching your criteria.</div>
+      ) : viewMode === "list" ? (
+        <FestivalList festivals={festivals} />
+      ) : (
+        <FestivalGrid festivals={festivals} />
+      )}
     </div>
   )
 }
