@@ -1,3 +1,6 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -13,35 +16,77 @@ import Attendees from "@/components/attendees"
 import EditHistory from "@/components/edit-history"
 import { SocialLinks } from "@/components/social-links"
 import { ReportButton } from "@/components/report-button"
+import { useEventsStore } from "@/lib/store/events-store"
+import { Event } from "@/lib/types"
 
-export default async function FestivalPage({
+export default function FestivalPage({
   params,
 }: {
   params: { id: string }
 }) {
-  // Extract the ID and ensure it's properly awaited
+  const [festival, setFestival] = useState<Event | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  
+  // Use the Zustand store
+  const { events, getEventById, fetchEvents } = useEventsStore()
+  
+  // Extract the ID
   const id = params.id
   
-  // Fetch event data from the backend API
+  useEffect(() => {
+    const loadEvent = async () => {
+      setIsLoading(true)
+      
+      // First try to get the event from the store
+      const eventFromStore = getEventById(id)
+      
+      if (eventFromStore) {
+        setFestival(eventFromStore)
+        setIsLoading(false)
+        return
+      }
+      
+      // If not in store, try to fetch all events
+      if (events.length === 0) {
+        await fetchEvents()
+        
+        // Check again after fetching all events
+        const eventAfterFetch = getEventById(id)
+        if (eventAfterFetch) {
+          setFestival(eventAfterFetch)
+          setIsLoading(false)
+          return
+        }
+      }
+      
+      // If still not found, fetch directly from API
+      try {
+        const response = await fetch(`/api/events/${id}`)
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch event')
+        }
+        
+        const data = await response.json()
+        setFestival(data)
+      } catch (err) {
+        console.error('Error fetching event:', err)
+        setError('Failed to load event. Please try again later.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadEvent()
+  }, [id, events, getEventById, fetchEvents])
   
-  // const response = await fetch(`/api/events/${id}`, {
-  const response = await fetch(`http://localhost:3000/api/events/${id}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    cache: 'no-store', // Ensure we get fresh data
-  })
-
-  if (!response.ok) {
-    console.error('Failed to fetch event:', await response.text())
-    notFound()
+  if (isLoading) {
+    return <div className="text-center py-8">Loading event...</div>
   }
-
-  const festival = await response.json()
-
-  if (!festival) {
-    notFound()
+  
+  if (error || !festival) {
+    return <div className="text-center py-8 text-destructive">{error || 'Event not found'}</div>
   }
 
   return (

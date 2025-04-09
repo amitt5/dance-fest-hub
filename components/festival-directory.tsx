@@ -9,10 +9,9 @@ import FestivalList from "@/components/festival-list"
 import FestivalGrid from "@/components/festival-grid"
 import { ListFilter, Grid, List } from "lucide-react"
 import { DANCE_STYLES, MONTHS } from "@/lib/constants"
+import { useEventsStore } from "@/lib/store/events-store"
 
 export default function FestivalDirectory() {
-  const [events, setEvents] = useState<Event[]>([])
-  const [isLoadingEvents, setIsLoadingEvents] = useState(true)
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid")
   const [festivals, setFestivals] = useState<Event[]>([])
   const [filters, setFilters] = useState({
@@ -21,35 +20,27 @@ export default function FestivalDirectory() {
     styles: [] as string[],
     artist: "",
   })
+  
+  // Use the Zustand store
+  const { events, isLoading, error, fetchEvents } = useEventsStore()
 
   // Fetch events on component mount
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await fetch('/api/events')
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch events')
-        }
-        
-        const data = await response.json()
-        setEvents(data)
-        setFestivals(data) // Initialize festivals with fetched data
-      } catch (error) {
-        console.error('Error fetching events:', error)
-      } finally {
-        setIsLoadingEvents(false)
-      }
-    }
-
     fetchEvents()
-  }, [])
+  }, [fetchEvents])
+
+  // Update filtered festivals when events or filters change
+  useEffect(() => {
+    if (events.length > 0) {
+      applyFilters()
+    }
+  }, [events, filters])
 
   // Get unique countries, months, and artists for filter dropdowns
   const countries = Array.from(new Set(events.map((f) => f.country)))
   
   const artists = Array.from(new Set(events.flatMap((f) => 
-    f.event_artists?.map((ea) => ea.artist.name)
+    f.event_artists.map((ea) => ea.artist.name)
   )))
 
   const handleStyleChange = (style: string) => {
@@ -231,8 +222,10 @@ export default function FestivalDirectory() {
         </Button>
       </div>
 
-      {isLoadingEvents ? (
+      {isLoading ? (
         <div className="text-center py-8">Loading events...</div>
+      ) : error ? (
+        <div className="text-center py-8 text-destructive">{error}</div>
       ) : festivals.length === 0 ? (
         <div className="text-center py-8">No events found matching your criteria.</div>
       ) : viewMode === "list" ? (
