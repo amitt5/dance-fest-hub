@@ -6,6 +6,53 @@ import type { DanceStyle } from '@/lib/constants'
 // Define valid styles enum to match database constraint
 const VALID_STYLES = ['bachata', 'salsa', 'kizomba', 'zouk'] as const
 
+export async function GET() {
+  try {
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ 
+      cookies: () => cookieStore 
+    }, {
+      options: {
+        db: {
+          schema: 'public'
+        }
+      }
+    })
+
+    const { data: events, error } = await supabase
+      .from('events')
+      .select(`
+        *,
+        event_styles (
+          style
+        ),
+        event_artists (
+          artist:artists (
+            id,
+            name
+          )
+        )
+      `)
+      .order('start_date', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching events:', error)
+      return NextResponse.json(
+        { error: 'Failed to fetch events' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json(events)
+  } catch (error) {
+    console.error('Error in GET /api/events:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const cookieStore = cookies()

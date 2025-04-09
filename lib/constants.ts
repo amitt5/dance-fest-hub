@@ -1,6 +1,21 @@
 // Dance styles supported by the platform
 export const DANCE_STYLES = ["bachata", "salsa", "kizomba", "zouk"] as const
 
+export const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+] as const
+
 // List of countries where dance festivals are commonly held
 export const COUNTRIES = [
   "Argentina",

@@ -8,7 +8,7 @@ import type { Festival } from "@/lib/types"
 import FestivalList from "@/components/festival-list"
 import FestivalGrid from "@/components/festival-grid"
 import { ListFilter, Grid, List } from "lucide-react"
-
+import { DANCE_STYLES, MONTHS } from "@/lib/constants"
 export default function FestivalDirectory({
   initialFestivals,
 }: {
@@ -25,22 +25,8 @@ export default function FestivalDirectory({
 
   // Get unique countries, months, and artists for filter dropdowns
   const countries = Array.from(new Set(initialFestivals.map((f) => f.country)))
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ]
+  
   const artists = Array.from(new Set(initialFestivals.flatMap((f) => f.artists)))
-  const danceStyles = ["Bachata", "Salsa", "Kizomba", "Zouk"]
 
   const handleStyleChange = (style: string) => {
     setFilters((prev) => {
@@ -100,7 +86,7 @@ export default function FestivalDirectory({
                   </SelectTrigger>
                   <SelectContent className="bg-secondary border-border">
                     <SelectItem value="all">All Months</SelectItem>
-                    {months.map((month) => (
+                    {MONTHS.map((month) => (
                       <SelectItem key={month} value={month}>
                         {month}
                       </SelectItem>
@@ -146,7 +132,7 @@ export default function FestivalDirectory({
               <div>
                 <label className="text-sm font-medium mb-1 block text-white">Dance Styles</label>
                 <div className="flex flex-wrap gap-3">
-                  {danceStyles.map((style) => (
+                  {DANCE_STYLES.map((style) => (
                     <div key={style} className="flex items-center space-x-2">
                       <Checkbox
                         id={`style-${style}`}
