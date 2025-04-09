@@ -14,7 +14,7 @@ import type { Event } from "@/lib/types"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
-import { CalendarIcon, X, Facebook, Instagram } from "lucide-react"
+import { CalendarIcon, X, FacebookIcon, Instagram } from "lucide-react"
 import { COUNTRIES, DANCE_STYLES } from "@/lib/constants"
 
 interface EventFormProps {
@@ -315,7 +315,7 @@ export default function EventForm({ initialData }: EventFormProps) {
               Facebook Event Page (Optional)
             </Label>
             <div className="relative">
-              <Facebook className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
+              <FacebookIcon className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="facebook_link"
                 name="facebook_link"

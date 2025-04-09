@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Facebook, Instagram } from "lucide-react"
+import { FacebookIcon, Instagram, InstagramIcon } from "lucide-react"
 import { supabase } from '../../lib/supabaseClient'
 
 export default function AuthPage() {
@@ -45,7 +45,7 @@ export default function AuthPage() {
             onClick={() => handleLogin("facebook")}
             disabled={isLoading}
           >
-            <Facebook className="mr-2 h-5 w-5" />
+            <FacebookIcon className="mr-2 h-5 w-5" />
             Continue with Facebook
           </Button>
 
@@ -54,7 +54,7 @@ export default function AuthPage() {
             onClick={() => handleLogin("google")}
             disabled={isLoading}
           >
-            <Instagram className="mr-2 h-5 w-5" />
+            <InstagramIcon className="mr-2 h-5 w-5" />
             Continue with Google
           </Button>
 

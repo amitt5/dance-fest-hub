@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Facebook, Instagram } from "lucide-react"
+import { FacebookIcon, InstagramIcon } from "lucide-react"
 
 interface Comment {
   id: string
@@ -84,9 +84,9 @@ export default function Comments({ festivalId }: { festivalId: string }) {
                 <h3 className="font-medium">{comment.user.name}</h3>
                 <div className="flex items-center text-sm text-muted-foreground">
                   {comment.user.socialType === "instagram" ? (
-                    <Instagram className="h-3 w-3 mr-1" />
+                    <InstagramIcon className="h-3 w-3 mr-1" />
                   ) : (
-                    <Facebook className="h-3 w-3 mr-1" />
+                    <FacebookIcon className="h-3 w-3 mr-1" />
                   )}
                   {comment.user.socialHandle}
                 </div>

@@ -1,5 +1,5 @@
 import type { Event } from "@/lib/types"
-import { Facebook, Instagram } from "lucide-react"
+import { FacebookIcon, InstagramIcon } from "lucide-react"
 
 interface SocialLinksProps {
   festival: Event
@@ -22,7 +22,7 @@ export function SocialLinks({ festival, size = "sm" }: SocialLinksProps) {
           rel="noopener noreferrer"
           className="text-blue-500 hover:text-blue-700"
         >
-          <Facebook className={sizeClass[size]} />
+          <FacebookIcon className={sizeClass[size]} />
         </a>
       )}
 
@@ -33,7 +33,7 @@ export function SocialLinks({ festival, size = "sm" }: SocialLinksProps) {
           rel="noopener noreferrer"
           className="text-pink-500 hover:text-pink-700"
         >
-          <Instagram className={sizeClass[size]} />
+          <InstagramIcon className={sizeClass[size]} />
         </a>
       )}
     </div>
