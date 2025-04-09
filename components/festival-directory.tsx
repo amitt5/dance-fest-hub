@@ -10,6 +10,8 @@ import FestivalGrid from "@/components/festival-grid"
 import { ListFilter, Grid, List } from "lucide-react"
 import { DANCE_STYLES, MONTHS } from "@/lib/constants"
 import { useEventsStore } from "@/lib/store/events-store"
+import { useToast } from "@/hooks/use-toast"
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 export default function FestivalDirectory() {
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid")
@@ -23,6 +25,8 @@ export default function FestivalDirectory() {
   
   // Use the Zustand store
   const { events, isLoading, error, fetchEvents } = useEventsStore()
+  const { toast } = useToast()
+  const supabase = createClientComponentClient()
 
   // Fetch events on component mount
   useEffect(() => {
@@ -91,6 +95,25 @@ export default function FestivalDirectory() {
       artist: "",
     })
     setFestivals(events)
+  }
+
+  const handleAddEventClick = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    console.log('Session check:', session ? 'Session exists' : 'No session')
+    
+    if (!session) {
+      console.log('Showing toast notification')
+      toast({
+        title: "Authentication required",
+        description: "Please log in to add an event",
+        variant: "destructive",
+      })
+      return
+    }
+    
+    window.location.href = '/add-event'
   }
 
   return (
@@ -218,7 +241,7 @@ export default function FestivalDirectory() {
         </div>
 
         <Button asChild className="bg-primary hover:bg-primary/90">
-          <a href="/add-event">Add Event</a>
+          <a href="/add-event" onClick={handleAddEventClick}>Add Event</a>
         </Button>
       </div>
 

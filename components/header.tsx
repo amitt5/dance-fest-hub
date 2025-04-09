@@ -7,11 +7,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Menu, X, LogOut } from "lucide-react"
 import { supabase } from '@/lib/supabaseClient'
 import { User, AuthChangeEvent, Session } from '@supabase/supabase-js'
+import { useToast } from "@/hooks/use-toast"
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
-
+  const { toast } = useToast()
   useEffect(() => {
     // Get initial auth state
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -28,6 +29,26 @@ export default function Header() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
+  }
+
+
+  const handleAddEventClick = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    console.log('Session check:', session ? 'Session exists' : 'No session')
+    
+    if (!session) {
+      console.log('Showing toast notification')
+      toast({
+        title: "Authentication required",
+        description: "Please log in to add an event",
+        variant: "destructive",
+      })
+      return
+    }
+    
+    window.location.href = '/add-event'
   }
 
   return (
@@ -47,7 +68,7 @@ export default function Header() {
           <Link href="/" className="text-white hover:text-primary">
             Festivals
           </Link>
-          <Link href="/add-event" className="text-white hover:text-primary">
+          <Link href="/add-event" onClick={handleAddEventClick} className="text-white hover:text-primary">
             Add Event
           </Link>
           {user ? (

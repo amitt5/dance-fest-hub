@@ -19,13 +19,14 @@ import { ReportButton } from "@/components/report-button"
 import { useEventsStore } from "@/lib/store/events-store"
 import { Event } from "@/lib/types"
 import { use } from 'react'
-
+import { supabase } from "@/lib/supabaseClient"
+import { useToast } from "@/hooks/use-toast"
 export default function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
   const {id} = use(params)
   const [festival, setFestival] = useState<Event | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  
+  const { toast } = useToast()
   // Use the Zustand store
   const { events, getEventById, fetchEvents } = useEventsStore()
   
@@ -86,6 +87,25 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     return <div className="text-center py-8 text-destructive">{error || 'Event not found'}</div>
   }
 
+  const handleEditEventClick = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    console.log('Session check:', session ? 'Session exists' : 'No session')
+    
+    if (!session) {
+      console.log('Showing toast notification')
+      toast({
+        title: "Authentication required",
+        description: "Please log in to edit an event",
+        variant: "destructive",
+      })
+      return
+    }
+    
+    window.location.href = '/add-event'
+  }
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -96,7 +116,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         </Link>
         <div className="flex gap-2">
           <ReportButton festivalId={festival.id} />
-          <Link href={`/edit-event/${festival.id}`}>
+          <Link href={`/edit-event/${festival.id}`} onClick={handleEditEventClick}>
             <Button variant="outline" className="border-white text-white hover:bg-secondary/80">
               <Edit className="mr-2 h-4 w-4" />
               Edit Event
