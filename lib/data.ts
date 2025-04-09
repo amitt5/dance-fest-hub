@@ -116,7 +116,7 @@ export async function getFestivals(): Promise<Event[]> {
 }
 
 // Function to get a festival by ID
-export async function getFestivalById(id: string): Promise<Event | undefined> {
+export async function getEventById(id: string): Promise<Event | undefined> {
   // In a real app, this would fetch from an API
   return festivals.find((festival) => festival.id === id)
 }

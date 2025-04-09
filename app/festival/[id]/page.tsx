@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { StarRating } from "@/components/star-rating"
-import { getFestivalById } from "@/lib/data"
+import { getEventById } from "@/lib/data"
 import { formatDateRange } from "@/lib/utils"
 import { ExternalLink, Edit, Users } from "lucide-react"
 import DiscountCodes from "@/components/discount-codes"
@@ -20,7 +20,7 @@ export default async function FestivalPage({
 }: {
   params: { id: string }
 }) {
-  const festival = await getFestivalById(params.id)
+  const festival = await getEventById(params.id)
 
   if (!festival) {
     notFound()
@@ -31,7 +31,7 @@ export default async function FestivalPage({
       <div className="flex justify-between items-center mb-6">
         <Link href="/">
           <Button variant="outline" className="border-white text-white hover:bg-secondary/80">
-            ← Back to Festivals
+            ← Back to Events
           </Button>
         </Link>
         <div className="flex gap-2">

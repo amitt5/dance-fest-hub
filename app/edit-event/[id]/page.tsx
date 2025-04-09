@@ -1,13 +1,13 @@
 import { notFound } from "next/navigation"
 import EventForm from "@/components/event-form"
-import { getFestivalById } from "@/lib/data"
+import { getEventById } from "@/lib/data"
 
 export default async function EditEventPage({
   params,
 }: {
   params: { id: string }
 }) {
-  const festival = await getFestivalById(params.id)
+  const festival = await getEventById(params.id)
 
   if (!festival) {
     notFound()
@@ -15,7 +15,7 @@ export default async function EditEventPage({
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Edit Festival</h1>
+      <h1 className="text-3xl font-bold mb-8">Edit Event</h1>
       <EventForm initialData={festival} />
     </div>
   )
