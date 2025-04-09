@@ -4,23 +4,21 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import type { Festival,Event } from "@/lib/types"
+import type { Event } from "@/lib/types"
 import FestivalList from "@/components/festival-list"
 import FestivalGrid from "@/components/festival-grid"
 import { ListFilter, Grid, List } from "lucide-react"
 import { DANCE_STYLES, MONTHS } from "@/lib/constants"
 
-
-
 export default function FestivalDirectory({
   initialFestivals,
 }: {
-  initialFestivals: Festival[]
+  initialFestivals: Event[]
 }) {
   const [events, setEvents] = useState<Event[]>([])
   const [isLoadingEvents, setIsLoadingEvents] = useState(true)
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid")
-  const [festivals, setFestivals] = useState<Festival[]>(initialFestivals)
+  const [festivals, setFestivals] = useState<Event[]>(initialFestivals)
   const [filters, setFilters] = useState({
     month: "",
     country: "",
@@ -31,7 +29,9 @@ export default function FestivalDirectory({
   // Get unique countries, months, and artists for filter dropdowns
   const countries = Array.from(new Set(initialFestivals.map((f) => f.country)))
   
-  const artists = Array.from(new Set(initialFestivals.flatMap((f) => f.artists)))
+  const artists = Array.from(new Set(initialFestivals.flatMap((f) => 
+    f.event_artists.map((ea) => ea.artist.name)
+  )))
 
   // Fetch events on component mount
   useEffect(() => {
@@ -43,7 +43,6 @@ export default function FestivalDirectory({
         }
         const data = await response.json()
         setEvents(data)
-        console.log('events', data, events)
       } catch (error) {
         console.error('Error fetching events:', error)
       } finally {
@@ -54,11 +53,11 @@ export default function FestivalDirectory({
     fetchEvents()
   }, [])
 
-
   const handleStyleChange = (style: string) => {
     setFilters((prev) => {
-      const newStyles = prev.styles.includes(style) ? prev.styles.filter((s) => s !== style) : [...prev.styles, style]
-
+      const newStyles = prev.styles.includes(style) 
+        ? prev.styles.filter((s) => s !== style) 
+        : [...prev.styles, style]
       return { ...prev, styles: newStyles }
     })
   }
@@ -68,7 +67,7 @@ export default function FestivalDirectory({
 
     if (filters.month) {
       filtered = filtered.filter((f) => {
-        const festivalMonth = new Date(f.startDate).toLocaleString("default", { month: "long" })
+        const festivalMonth = new Date(f.start_date).toLocaleString("default", { month: "long" })
         return festivalMonth === filters.month
       })
     }
@@ -78,11 +77,17 @@ export default function FestivalDirectory({
     }
 
     if (filters.styles.length > 0) {
-      filtered = filtered.filter((f) => filters.styles.some((style) => f.styles.includes(style)))
+      filtered = filtered.filter((f) => 
+        filters.styles.some((style) => 
+          f.event_styles.some((es) => es.style === style)
+        )
+      )
     }
 
     if (filters.artist) {
-      filtered = filtered.filter((f) => f.artists.includes(filters.artist))
+      filtered = filtered.filter((f) => 
+        f.event_artists.some((ea) => ea.artist.name === filters.artist)
+      )
     }
 
     setFestivals(filtered)

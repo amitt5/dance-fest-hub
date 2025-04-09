@@ -1,8 +1,8 @@
-import type { Festival } from "@/lib/types"
+import type { Event } from "@/lib/types"
 import { Facebook, Instagram } from "lucide-react"
 
 interface SocialLinksProps {
-  festival: Festival
+  festival: Event
   size?: "sm" | "md" | "lg"
 }
 
@@ -15,9 +15,9 @@ export function SocialLinks({ festival, size = "sm" }: SocialLinksProps) {
 
   return (
     <div className="flex items-center gap-2">
-      {festival.facebookPage && (
+      {festival.facebook_link && (
         <a
-          href={festival.facebookPage}
+          href={festival.facebook_link}
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-500 hover:text-blue-700"
@@ -26,9 +26,9 @@ export function SocialLinks({ festival, size = "sm" }: SocialLinksProps) {
         </a>
       )}
 
-      {festival.instagramPage && (
+      {festival.instagram_link && (
         <a
-          href={festival.instagramPage}
+          href={festival.instagram_link}
           target="_blank"
           rel="noopener noreferrer"
           className="text-pink-500 hover:text-pink-700"

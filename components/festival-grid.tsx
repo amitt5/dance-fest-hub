@@ -1,5 +1,5 @@
 import Link from "next/link"
-import type { Festival } from "@/lib/types"
+import type { Event } from "@/lib/types"
 import { formatDateRange } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
@@ -8,7 +8,7 @@ import { Users } from "lucide-react"
 import { SocialLinks } from "@/components/social-links"
 import { ReportButton } from "@/components/report-button"
 
-export default function FestivalGrid({ festivals }: { festivals: Festival[] }) {
+export default function FestivalGrid({ festivals }: { festivals: Event[] }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {festivals.length === 0 ? (
@@ -24,7 +24,7 @@ export default function FestivalGrid({ festivals }: { festivals: Festival[] }) {
             <Link href={`/festival/${festival.id}`}>
               <div className="h-48 overflow-hidden relative">
                 <img
-                  src={festival.image || "/placeholder.svg"}
+                  src={festival.poster_url || "/placeholder.svg"}
                   alt={festival.name}
                   className="w-full h-full object-cover transition-transform hover:scale-105"
                 />
@@ -44,7 +44,7 @@ export default function FestivalGrid({ festivals }: { festivals: Festival[] }) {
                 <StarRating rating={festival.rating} />
               </div>
 
-              <p className="text-sm text-muted-foreground">{formatDateRange(festival.startDate, festival.endDate)}</p>
+              <p className="text-sm text-muted-foreground">{formatDateRange(festival.start_date, festival.end_date)}</p>
 
               <p className="text-sm font-medium text-white">
                 {festival.city}, {festival.country}
@@ -62,9 +62,9 @@ export default function FestivalGrid({ festivals }: { festivals: Festival[] }) {
 
             <CardFooter className="p-4 pt-0">
               <div className="flex flex-wrap gap-1">
-                {festival.styles.map((style) => (
-                  <Badge key={style} variant="outline" className="text-xs border-accent/50 text-white">
-                    {style}
+                {festival.event_styles.map((style) => (
+                  <Badge key={style.style} variant="outline" className="text-xs border-accent/50 text-white">
+                    {style.style}
                   </Badge>
                 ))}
               </div>

@@ -1,20 +1,3 @@
-export interface Festival {
-  id: string
-  name: string
-  startDate: string
-  endDate: string
-  city: string
-  country: string
-  description: string
-  styles: string[]
-  artists: string[]
-  image: string
-  website?: string
-  facebookPage?: string
-  instagramPage?: string
-  rating: number
-  attendeeCount: number
-}
 
 export interface Event {
   id: string

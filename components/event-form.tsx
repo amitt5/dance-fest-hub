@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import type { Festival } from "@/lib/types"
+import type { Event } from "@/lib/types"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
@@ -18,7 +18,7 @@ import { CalendarIcon, X, Facebook, Instagram } from "lucide-react"
 import { COUNTRIES, DANCE_STYLES } from "@/lib/constants"
 
 interface EventFormProps {
-  initialData?: Festival
+  initialData?: Event
 }
 
 interface Artist {
@@ -28,30 +28,29 @@ interface Artist {
 
 export default function EventForm({ initialData }: EventFormProps) {
   const router = useRouter()
-  const [formData, setFormData] = useState<Partial<Festival>>(
+  const [formData, setFormData] = useState<Partial<Event>>(
     initialData || {
       name: "",
-      startDate: "",
-      endDate: "",
+      start_date: "",
+      end_date: "",
       city: "",
       country: "",
       website: "",
-      facebookPage: "",
-      instagramPage: "",
+      facebook_link: "",
+      instagram_link: "",
       description: "",
-      styles: [],
-      artists: [],
-      image: "/placeholder.svg?height=400&width=600",
-      attendeeCount: 0,
+      event_styles: [],
+      event_artists: [],
+      poster_url: "/placeholder.svg?height=400&width=600",
     },
   )
 
   const [startDate, setStartDate] = useState<Date | undefined>(
-    initialData?.startDate ? new Date(initialData.startDate) : undefined,
+    initialData?.start_date ? new Date(initialData.start_date) : undefined,
   )
 
   const [endDate, setEndDate] = useState<Date | undefined>(
-    initialData?.endDate ? new Date(initialData.endDate) : undefined,
+    initialData?.end_date ? new Date(initialData.end_date) : undefined,
   )
 
   const [newArtist, setNewArtist] = useState("")
@@ -59,6 +58,8 @@ export default function EventForm({ initialData }: EventFormProps) {
   const [isLoadingArtists, setIsLoadingArtists] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [selectedStyles, setSelectedStyles] = useState<string[]>([])
+  const [selectedArtists, setSelectedArtists] = useState<string[]>([])
 
   useEffect(() => {
     const fetchArtists = async () => {
@@ -85,22 +86,18 @@ export default function EventForm({ initialData }: EventFormProps) {
   }
 
   const handleStyleChange = (style: string) => {
-    setFormData((prev) => {
-      const styles = prev.styles || []
-      return {
-        ...prev,
-        styles: styles.includes(style) ? styles.filter((s) => s !== style) : [...styles, style],
-      }
+    setSelectedStyles(prev => {
+      return prev.includes(style) 
+        ? prev.filter((s: string) => s !== style) 
+        : [...prev, style]
     })
   }
 
   const handleArtistChange = (artistName: string) => {
-    setFormData((prev) => {
-      const artists = prev.artists || []
-      return {
-        ...prev,
-        artists: artists.includes(artistName) ? artists.filter((a) => a !== artistName) : [...artists, artistName],
-      }
+    setSelectedArtists(prev => {
+      return prev.includes(artistName)
+        ? prev.filter((a: string) => a !== artistName)
+        : [...prev, artistName]
     })
   }
 
@@ -108,7 +105,6 @@ export default function EventForm({ initialData }: EventFormProps) {
     if (!newArtist.trim()) return
 
     try {
-      // Save artist to database
       const response = await fetch('/api/artists', {
         method: 'POST',
         headers: {
@@ -122,22 +118,8 @@ export default function EventForm({ initialData }: EventFormProps) {
       }
 
       const savedArtist = await response.json()
-      
-      // Update allArtists state with the new artist
       setAllArtists(prev => [...prev, savedArtist])
-
-      // Update form data with new artist
-      setFormData((prev) => {
-        const artists = prev.artists || []
-        if (!artists.includes(savedArtist.name)) {
-          return {
-            ...prev,
-            artists: [...artists, savedArtist.name],
-          }
-        }
-        return prev
-      })
-
+      setSelectedArtists(prev => [...prev, savedArtist.name])
       setNewArtist("")
     } catch (error) {
       console.error('Error saving artist:', error)
@@ -145,26 +127,20 @@ export default function EventForm({ initialData }: EventFormProps) {
   }
 
   const handleRemoveArtist = (artist: string) => {
-    setFormData((prev) => {
-      const artists = prev.artists || []
-      return {
-        ...prev,
-        artists: artists.filter((a) => a !== artist),
-      }
-    })
+    setSelectedArtists(prev => prev.filter(a => a !== artist))
   }
 
   const handleStartDateChange = (date: Date | undefined) => {
     setStartDate(date)
     if (date) {
-      setFormData({ ...formData, startDate: date.toISOString().split("T")[0] })
+      setFormData({ ...formData, start_date: date.toISOString().split("T")[0] })
     }
   }
 
   const handleEndDateChange = (date: Date | undefined) => {
     setEndDate(date)
     if (date) {
-      setFormData({ ...formData, endDate: date.toISOString().split("T")[0] })
+      setFormData({ ...formData, end_date: date.toISOString().split("T")[0] })
     }
   }
 
@@ -187,11 +163,11 @@ export default function EventForm({ initialData }: EventFormProps) {
           country: formData.country,
           website: formData.website || null,
           description: formData.description || null,
-          posterUrl: formData.image !== '/placeholder.svg?height=400&width=600' ? formData.image : null,
-          facebookLink: formData.facebookPage || null,
-          instagramLink: formData.instagramPage || null,
-          artists: formData.artists || [],
-          styles: formData.styles || [],
+          posterUrl: formData.poster_url !== '/placeholder.svg?height=400&width=600' ? formData.poster_url : null,
+          facebookLink: formData.facebook_link || null,
+          instagramLink: formData.instagram_link || null,
+          artists: selectedArtists,
+          styles: selectedStyles,
         }),
       })
 
@@ -333,20 +309,19 @@ export default function EventForm({ initialData }: EventFormProps) {
           />
         </div>
 
-        {/* Social Media Links */}
         <div className="space-y-4">
           <div>
-            <Label htmlFor="facebookPage" className="text-white">
+            <Label htmlFor="facebook_link" className="text-white">
               Facebook Event Page (Optional)
             </Label>
             <div className="relative">
               <Facebook className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                id="facebookPage"
-                name="facebookPage"
+                id="facebook_link"
+                name="facebook_link"
                 type="url"
                 placeholder="https://facebook.com/events/..."
-                value={formData.facebookPage || ''}
+                value={formData.facebook_link || ''}
                 onChange={handleInputChange}
                 className="pl-8 bg-secondary border-border"
               />
@@ -354,17 +329,17 @@ export default function EventForm({ initialData }: EventFormProps) {
           </div>
 
           <div>
-            <Label htmlFor="instagramPage" className="text-white">
+            <Label htmlFor="instagram_link" className="text-white">
               Instagram Page (Optional)
             </Label>
             <div className="relative">
               <Instagram className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                id="instagramPage"
-                name="instagramPage"
+                id="instagram_link"
+                name="instagram_link"
                 type="url"
                 placeholder="https://instagram.com/..."
-                value={formData.instagramPage || ''}
+                value={formData.instagram_link || ''}
                 onChange={handleInputChange}
                 className="pl-8 bg-secondary border-border"
               />
@@ -394,7 +369,7 @@ export default function EventForm({ initialData }: EventFormProps) {
               <div key={style} className="flex items-center space-x-2">
                 <Checkbox
                   id={`style-${style}`}
-                  checked={(formData.styles || []).includes(style)}
+                  checked={selectedStyles.includes(style)}
                   onCheckedChange={() => handleStyleChange(style)}
                   className="border-white data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 />
@@ -416,7 +391,7 @@ export default function EventForm({ initialData }: EventFormProps) {
                 <div key={artist.id} className="flex items-center space-x-2">
                   <Checkbox
                     id={`artist-${artist.id}`}
-                    checked={(formData.artists || []).includes(artist.name)}
+                    checked={selectedArtists.includes(artist.name)}
                     onCheckedChange={() => handleArtistChange(artist.name)}
                     className="border-white data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                   />
@@ -440,11 +415,11 @@ export default function EventForm({ initialData }: EventFormProps) {
             </Button>
           </div>
 
-          {(formData.artists || []).length > 0 && (
+          {selectedArtists.length > 0 && (
             <div className="mt-4">
               <Label className="text-white">Selected Artists:</Label>
               <div className="flex flex-wrap gap-2 mt-2">
-                {(formData.artists || []).map((artist) => (
+                {selectedArtists.map((artist) => (
                   <div
                     key={artist}
                     className="bg-secondary px-3 py-1 rounded-full text-sm flex items-center border border-border"
@@ -465,14 +440,14 @@ export default function EventForm({ initialData }: EventFormProps) {
         </div>
 
         <div>
-          <Label htmlFor="image" className="text-white">
+          <Label htmlFor="poster_url" className="text-white">
             Poster/Image Upload
           </Label>
           <div className="mt-2">
             <div className="border-2 border-dashed border-border rounded-lg p-6 text-center bg-secondary">
               <div className="mb-4">
                 <img
-                  src={formData.image || "/placeholder.svg"}
+                  src={formData.poster_url || "/placeholder.svg"}
                   alt="Event poster preview"
                   className="mx-auto h-48 object-contain"
                 />

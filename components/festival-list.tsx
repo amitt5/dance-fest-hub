@@ -1,5 +1,5 @@
 import Link from "next/link"
-import type { Festival } from "@/lib/types"
+import type { Event } from "@/lib/types"
 import { formatDateRange } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { StarRating } from "@/components/star-rating"
@@ -7,7 +7,7 @@ import { Users } from "lucide-react"
 import { SocialLinks } from "@/components/social-links"
 import { ReportButton } from "@/components/report-button"
 
-export default function FestivalList({ festivals }: { festivals: Festival[] }) {
+export default function FestivalList({ festivals }: { festivals: Event[] }) {
   return (
     <div className="space-y-4">
       {festivals.length === 0 ? (
@@ -24,7 +24,7 @@ export default function FestivalList({ festivals }: { festivals: Festival[] }) {
               <div className="md:w-1/4 lg:w-1/6 relative">
                 <Link href={`/festival/${festival.id}`}>
                   <img
-                    src={festival.image || "/placeholder.svg"}
+                    src={festival.poster_url || "/placeholder.svg"}
                     alt={festival.name}
                     className="w-full h-40 object-cover rounded-md"
                   />
@@ -41,19 +41,18 @@ export default function FestivalList({ festivals }: { festivals: Festival[] }) {
                       {festival.name}
                     </h2>
                   </Link>
-                  <StarRating rating={festival.rating} />
                 </div>
 
-                <p className="text-sm text-muted-foreground">{formatDateRange(festival.startDate, festival.endDate)}</p>
+                <p className="text-sm text-muted-foreground">{formatDateRange(festival.start_date, festival.end_date)}</p>
 
                 <p className="font-medium text-white">
                   {festival.city}, {festival.country}
                 </p>
 
                 <div className="flex flex-wrap gap-2">
-                  {festival.styles.map((style) => (
-                    <Badge key={style} variant="outline" className="border-accent/50 text-white">
-                      {style}
+                  {festival.event_styles.map((style) => (
+                    <Badge key={style.style} variant="outline" className="border-accent/50 text-white">
+                      {style.style}
                     </Badge>
                   ))}
                 </div>
@@ -61,16 +60,11 @@ export default function FestivalList({ festivals }: { festivals: Festival[] }) {
                 <div className="flex justify-between items-center">
                   <div className="text-sm text-white">
                     <span className="font-medium">Artists: </span>
-                    {festival.artists.join(", ")}
+                    {festival.event_artists.map((ea) => ea.artist.name).join(", ")}
                   </div>
 
                   <div className="flex items-center gap-3">
                     <SocialLinks festival={festival} />
-
-                    <div className="flex items-center text-muted-foreground">
-                      <Users className="h-4 w-4 mr-1" />
-                      <span className="text-sm">{festival.attendeeCount}</span>
-                    </div>
                   </div>
                 </div>
               </div>

@@ -1,118 +1,123 @@
-import type { Festival } from "./types"
+import type { Event } from "./types"
 
 // Mock data for festivals
-const festivals: Festival[] = [
+const festivals: Event[] = [
   {
     id: "1",
     name: "Barcelona Bachata Festival",
-    startDate: "2023-07-20",
-    endDate: "2023-07-23",
+    start_date: "2023-07-20",
+    end_date: "2023-07-23",
     city: "Barcelona",
     country: "Spain",
     description:
       "Join us for a weekend of bachata dancing with international artists and DJs. Workshops, performances, and social dancing all weekend long.",
-    styles: ["Bachata", "Salsa"],
-    artists: ["DJ Mambo", "Maria & Carlos", "Bachata Sensual Team"],
-    image: "/placeholder.svg?height=400&width=600",
+    event_styles: [{ style: "Bachata" }, { style: "Salsa" }],
+    event_artists: [{ artist: { id: "1", name: "DJ Mambo" } }, { artist: { id: "2", name: "Maria & Carlos" } }, { artist: { id: "3", name: "Bachata Sensual Team" } }],
+    poster_url: "/placeholder.svg?height=400&width=600",
     website: "https://example.com/barcelona-bachata",
-    facebookPage: "https://facebook.com/barcelonabachata",
-    instagramPage: "https://instagram.com/bcnbachata",
-    rating: 4.8,
-    attendeeCount: 124,
+    facebook_link: "https://facebook.com/barcelonabachata",
+    instagram_link: "https://instagram.com/bcnbachata",
+    created_at: "2023-01-15T00:00:00Z",
   },
   {
     id: "2",
     name: "Miami Salsa Congress",
-    startDate: "2023-08-15",
-    endDate: "2023-08-20",
+    start_date: "2023-08-15",
+    end_date: "2023-08-20",
     city: "Miami",
     country: "USA",
     description:
       "The biggest salsa event in Miami featuring workshops, performances, and parties with the best salsa artists from around the world.",
-    styles: ["Salsa", "Bachata"],
-    artists: ["Salsa Kings", "DJ Mambo", "Latin Vibes Crew"],
-    image: "/placeholder.svg?height=400&width=600",
+    event_styles: [{ style: "Salsa" }, { style: "Bachata" }],
+    event_artists: [{ artist: { id: "1", name: "Salsa Kings" } }, { artist: { id: "2", name: "DJ Mambo" } }, { artist: { id: "3", name: "Latin Vibes Crew" } }],
+    poster_url: "/placeholder.svg?height=400&width=600",
     website: "https://example.com/miami-salsa",
-    facebookPage: "https://facebook.com/miamisalsa",
-    rating: 4.5,
-    attendeeCount: 256,
+    facebook_link: "https://facebook.com/miamisalsa",
+    created_at: "2023-02-01T00:00:00Z",
   },
   {
     id: "3",
     name: "Paris Kizomba Festival",
-    startDate: "2023-09-10",
-    endDate: "2023-09-12",
+    start_date: "2023-09-10",
+    end_date: "2023-09-12",
     city: "Paris",
     country: "France",
     description: "Experience the best of kizomba dancing in the heart of Paris with international instructors and DJs.",
-    styles: ["Kizomba", "Semba"],
-    artists: ["Kizomba Fusion", "DJ Kizz", "Semba Masters"],
-    image: "/placeholder.svg?height=400&width=600",
+    event_styles: [{ style: "Kizomba" }, { style: "Semba" }],
+    event_artists: [{ artist: { id: "1", name: "Kizomba Fusion" } }, { artist: { id: "2", name: "DJ Kizz" } }, { artist: { id: "3", name: "Semba Masters" } }],
+    poster_url: "/placeholder.svg?height=400&width=600",
     website: "https://example.com/paris-kizomba",
-    instagramPage: "https://instagram.com/pariskizomba",
-    rating: 4.2,
-    attendeeCount: 89,
+    instagram_link: "https://instagram.com/pariskizomba",
+    created_at: "2023-02-15T00:00:00Z",
   },
   {
     id: "4",
     name: "Berlin Zouk Congress",
-    startDate: "2023-10-05",
-    endDate: "2023-10-08",
+    start_date: "2023-10-05",
+    end_date: "2023-10-08",
     city: "Berlin",
     country: "Germany",
     description:
       "A weekend dedicated to Brazilian Zouk with workshops, shows, and parties featuring international zouk artists.",
-    styles: ["Zouk"],
-    artists: ["Zouk Masters", "DJ Rio", "Brazilian Zouk Team"],
-    image: "/placeholder.svg?height=400&width=600",
+    event_styles: [{ style: "Zouk" }],
+    event_artists: [
+      { artist: { id: "1", name: "Zouk Masters" } },
+      { artist: { id: "2", name: "DJ Rio" } },
+      { artist: { id: "3", name: "Brazilian Zouk Team" } }
+    ],
+    poster_url: "/placeholder.svg?height=400&width=600",
     website: "https://example.com/berlin-zouk",
-    facebookPage: "https://facebook.com/berlinzouk",
-    instagramPage: "https://instagram.com/berlinzouk",
-    rating: 4.6,
-    attendeeCount: 178,
+    facebook_link: "https://facebook.com/berlinzouk",
+    instagram_link: "https://instagram.com/berlinzouk",
+    created_at: "2023-03-01T00:00:00Z",
   },
   {
     id: "5",
     name: "Cancun Bachata Festival",
-    startDate: "2023-11-15",
-    endDate: "2023-11-20",
+    start_date: "2023-11-15",
+    end_date: "2023-11-20",
     city: "Cancun",
     country: "Mexico",
     description: "Dance bachata on the beautiful beaches of Cancun with top international instructors and DJs.",
-    styles: ["Bachata", "Salsa"],
-    artists: ["Bachata Passion", "DJ Latino", "Maria & Carlos"],
-    image: "/placeholder.svg?height=400&width=600",
+    event_styles: [{ style: "Bachata" }, { style: "Salsa" }],
+    event_artists: [
+      { artist: { id: "1", name: "Bachata Passion" } },
+      { artist: { id: "2", name: "DJ Latino" } },
+      { artist: { id: "3", name: "Maria & Carlos" } }
+    ],
+    poster_url: "/placeholder.svg?height=400&width=600",
     website: "https://example.com/cancun-bachata",
-    rating: 4.9,
-    attendeeCount: 210,
+    created_at: "2023-03-15T00:00:00Z",
   },
   {
     id: "6",
     name: "Toronto Salsa Weekend",
-    startDate: "2023-12-01",
-    endDate: "2023-12-03",
+    start_date: "2023-12-01",
+    end_date: "2023-12-03",
     city: "Toronto",
     country: "Canada",
     description: "A weekend of salsa dancing in downtown Toronto with workshops, social dancing, and performances.",
-    styles: ["Salsa", "Bachata"],
-    artists: ["Salsa Kings", "DJ Toronto", "Latin Vibes Crew"],
-    image: "/placeholder.svg?height=400&width=600",
+    event_styles: [{ style: "Salsa" }, { style: "Bachata" }],
+    event_artists: [
+      { artist: { id: "1", name: "Salsa Kings" } },
+      { artist: { id: "2", name: "DJ Toronto" } },
+      { artist: { id: "3", name: "Latin Vibes Crew" } }
+    ],
+    poster_url: "/placeholder.svg?height=400&width=600",
     website: "https://example.com/toronto-salsa",
-    facebookPage: "https://facebook.com/torontosalsa",
-    rating: 4.3,
-    attendeeCount: 67,
+    created_at: "2023-04-01T00:00:00Z",
   },
 ]
 
 // Function to get all festivals
-export async function getFestivals(): Promise<Festival[]> {
-  // In a real app, this would fetch from an API or database
+export async function getFestivals(): Promise<Event[]> {
+  // In a real app, this would fetch from an API
   return festivals
 }
 
 // Function to get a festival by ID
-export async function getFestivalById(id: string): Promise<Festival | undefined> {
-  // In a real app, this would fetch from an API or database
+export async function getFestivalById(id: string): Promise<Event | undefined> {
+  // In a real app, this would fetch from an API
   return festivals.find((festival) => festival.id === id)
 }
 
