@@ -18,25 +18,25 @@ interface DiscountCode {
 }
 
 export default function DiscountCodes({ festivalId }: { festivalId: string }) {
-  const [user, setUser] = useState<any>(null)
+  const [session, setSession] = useState<any>(null)
   const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>([])
   const [newCode, setNewCode] = useState("")
   const [newDescription, setNewDescription] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
-  // Get user session on component mount
+  // Get session on component mount
   useEffect(() => {
     const getUser = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       console.log('session1121', session)
-      setUser(session?.user || null)
+      setSession(session)
     }
     
     getUser()
     
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null)
+      setSession(session || null)
     })
     
     return () => {
@@ -65,7 +65,7 @@ export default function DiscountCodes({ festivalId }: { festivalId: string }) {
 
   const handleAddCode = async () => {
     if (!newCode || !newDescription) return
-    if (!user) {
+    if (!session) {
       toast.error('You must be logged in to add discount codes')
       return
     }
@@ -76,6 +76,7 @@ export default function DiscountCodes({ festivalId }: { festivalId: string }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token}`,
         },
         body: JSON.stringify({
           code: newCode,
@@ -102,7 +103,7 @@ export default function DiscountCodes({ festivalId }: { festivalId: string }) {
   }
 
   const handleVote = async (id: string, isUpvote: boolean) => {
-    if (!user) {
+    if (!session) {
       toast.error('You must be logged in to vote')
       return
     }
@@ -153,7 +154,7 @@ export default function DiscountCodes({ festivalId }: { festivalId: string }) {
                   <button
                     onClick={() => handleVote(code.id, true)}
                     className="flex items-center space-x-1 text-green-600 hover:text-green-800"
-                    disabled={!user}
+                    disabled={!session}
                   >
                     <ThumbsUp className="h-4 w-4" />
                     <span>{code.upvotes}</span>
@@ -162,7 +163,7 @@ export default function DiscountCodes({ festivalId }: { festivalId: string }) {
                   <button
                     onClick={() => handleVote(code.id, false)}
                     className="flex items-center space-x-1 text-red-600 hover:text-red-800"
-                    disabled={!user}
+                    disabled={!session}
                   >
                     <ThumbsDown className="h-4 w-4" />
                     <span>{code.downvotes}</span>
@@ -187,7 +188,7 @@ export default function DiscountCodes({ festivalId }: { festivalId: string }) {
               onChange={(e) => setNewCode(e.target.value)}
               placeholder="e.g., SUMMER2023"
               className="font-mono"
-              disabled={!user || isLoading}
+              disabled={!session || isLoading}
             />
           </div>
 
@@ -200,18 +201,18 @@ export default function DiscountCodes({ festivalId }: { festivalId: string }) {
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
               placeholder="e.g., 10% off early bird tickets"
-              disabled={!user || isLoading}
+              disabled={!session || isLoading}
             />
           </div>
 
           <Button 
             onClick={handleAddCode} 
-            disabled={!user || isLoading || !newCode || !newDescription}
+            disabled={!session || isLoading || !newCode || !newDescription}
           >
             {isLoading ? 'Adding...' : 'Add Discount Code'}
           </Button>
           
-          {!user && (
+          {!session && (
             <p className="text-sm text-amber-600">
               Please log in to add discount codes
             </p>
