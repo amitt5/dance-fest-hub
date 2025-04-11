@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     const {
       data: { session },
     } = await supabase.auth.getSession()
-
+    console.log('session1111', session, request)
     const json = await request.json()
     const {
       name,

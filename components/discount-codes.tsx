@@ -1,9 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ThumbsUp, ThumbsDown } from "lucide-react"
+import { supabase } from "@/lib/supabaseClient"
+import { toast } from "sonner"
 
 interface DiscountCode {
   id: string
@@ -11,68 +13,121 @@ interface DiscountCode {
   description: string
   upvotes: number
   downvotes: number
-  addedBy: string
-  addedDate: string
+  user_id: string
+  created_at: string
 }
 
-// Mock data
-const mockDiscountCodes: DiscountCode[] = [
-  {
-    id: "1",
-    code: "EARLY2023",
-    description: "15% off if you book before June",
-    upvotes: 12,
-    downvotes: 2,
-    addedBy: "dancefan123",
-    addedDate: "2023-04-15",
-  },
-  {
-    id: "2",
-    code: "INSTA10",
-    description: "10% discount from Instagram promo",
-    upvotes: 8,
-    downvotes: 1,
-    addedBy: "salsaqueen",
-    addedDate: "2023-04-20",
-  },
-]
-
 export default function DiscountCodes({ festivalId }: { festivalId: string }) {
-  const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>(mockDiscountCodes)
+  const [user, setUser] = useState<any>(null)
+  const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>([])
   const [newCode, setNewCode] = useState("")
   const [newDescription, setNewDescription] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleAddCode = () => {
-    if (!newCode || !newDescription) return
-
-    const newDiscountCode: DiscountCode = {
-      id: Date.now().toString(),
-      code: newCode,
-      description: newDescription,
-      upvotes: 0,
-      downvotes: 0,
-      addedBy: "You",
-      addedDate: new Date().toISOString().split("T")[0],
+  // Get user session on component mount
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      console.log('session1121', session)
+      setUser(session?.user || null)
     }
+    
+    getUser()
+    
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null)
+    })
+    
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [supabase.auth])
 
-    setDiscountCodes([...discountCodes, newDiscountCode])
-    setNewCode("")
-    setNewDescription("")
+  // Fetch discount codes on component mount
+  useEffect(() => {
+    fetchDiscountCodes()
+  }, [festivalId])
+
+  const fetchDiscountCodes = async () => {
+    try {
+      const response = await fetch(`/api/discount_codes?eventId=${festivalId}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch discount codes')
+      }
+      const data = await response.json()
+      setDiscountCodes(data)
+    } catch (error) {
+      console.error('Error fetching discount codes:', error)
+      toast.error('Failed to load discount codes')
+    }
   }
 
-  const handleVote = (id: string, isUpvote: boolean) => {
-    setDiscountCodes(
-      discountCodes.map((code) => {
-        if (code.id === id) {
-          if (isUpvote) {
-            return { ...code, upvotes: code.upvotes + 1 }
-          } else {
-            return { ...code, downvotes: code.downvotes + 1 }
-          }
-        }
-        return code
-      }),
-    )
+  const handleAddCode = async () => {
+    if (!newCode || !newDescription) return
+    if (!user) {
+      toast.error('You must be logged in to add discount codes')
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/discount_codes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: newCode,
+          description: newDescription,
+          eventId: festivalId,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to add discount code')
+      }
+
+      const newDiscountCode = await response.json()
+      setDiscountCodes([newDiscountCode, ...discountCodes])
+      setNewCode("")
+      setNewDescription("")
+      toast.success('Discount code added successfully')
+    } catch (error) {
+      console.error('Error adding discount code:', error)
+      toast.error('Failed to add discount code')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleVote = async (id: string, isUpvote: boolean) => {
+    if (!user) {
+      toast.error('You must be logged in to vote')
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/discount_codes/${id}/vote`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          isUpvote,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to vote')
+      }
+
+      // Refresh the discount codes after voting
+      fetchDiscountCodes()
+    } catch (error) {
+      console.error('Error voting:', error)
+      toast.error('Failed to register your vote')
+    }
   }
 
   return (
@@ -80,37 +135,43 @@ export default function DiscountCodes({ festivalId }: { festivalId: string }) {
       <h2 className="text-2xl font-bold">Discount Codes</h2>
 
       <div className="space-y-4">
-        {discountCodes.map((code) => (
-          <div key={code.id} className="border rounded-lg p-4">
-            <div className="flex justify-between">
-              <div>
-                <h3 className="text-lg font-bold font-mono">{code.code}</h3>
-                <p className="text-muted-foreground">{code.description}</p>
-                <p className="text-xs mt-2">
-                  Added by {code.addedBy} on {code.addedDate}
-                </p>
-              </div>
+        {discountCodes.length === 0 ? (
+          <p className="text-muted-foreground">No discount codes available yet.</p>
+        ) : (
+          discountCodes.map((code) => (
+            <div key={code.id} className="border rounded-lg p-4">
+              <div className="flex justify-between">
+                <div>
+                  <h3 className="text-lg font-bold font-mono">{code.code}</h3>
+                  <p className="text-muted-foreground">{code.description}</p>
+                  <p className="text-xs mt-2">
+                    Added on {new Date(code.created_at).toLocaleDateString()}
+                  </p>
+                </div>
 
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => handleVote(code.id, true)}
-                  className="flex items-center space-x-1 text-green-600 hover:text-green-800"
-                >
-                  <ThumbsUp className="h-4 w-4" />
-                  <span>{code.upvotes}</span>
-                </button>
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => handleVote(code.id, true)}
+                    className="flex items-center space-x-1 text-green-600 hover:text-green-800"
+                    disabled={!user}
+                  >
+                    <ThumbsUp className="h-4 w-4" />
+                    <span>{code.upvotes}</span>
+                  </button>
 
-                <button
-                  onClick={() => handleVote(code.id, false)}
-                  className="flex items-center space-x-1 text-red-600 hover:text-red-800"
-                >
-                  <ThumbsDown className="h-4 w-4" />
-                  <span>{code.downvotes}</span>
-                </button>
+                  <button
+                    onClick={() => handleVote(code.id, false)}
+                    className="flex items-center space-x-1 text-red-600 hover:text-red-800"
+                    disabled={!user}
+                  >
+                    <ThumbsDown className="h-4 w-4" />
+                    <span>{code.downvotes}</span>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       <div className="border-t pt-6">
@@ -126,6 +187,7 @@ export default function DiscountCodes({ festivalId }: { festivalId: string }) {
               onChange={(e) => setNewCode(e.target.value)}
               placeholder="e.g., SUMMER2023"
               className="font-mono"
+              disabled={!user || isLoading}
             />
           </div>
 
@@ -138,10 +200,22 @@ export default function DiscountCodes({ festivalId }: { festivalId: string }) {
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
               placeholder="e.g., 10% off early bird tickets"
+              disabled={!user || isLoading}
             />
           </div>
 
-          <Button onClick={handleAddCode}>Add Discount Code</Button>
+          <Button 
+            onClick={handleAddCode} 
+            disabled={!user || isLoading || !newCode || !newDescription}
+          >
+            {isLoading ? 'Adding...' : 'Add Discount Code'}
+          </Button>
+          
+          {!user && (
+            <p className="text-sm text-amber-600">
+              Please log in to add discount codes
+            </p>
+          )}
         </div>
       </div>
     </div>

@@ -174,7 +174,7 @@ export default function EventForm({ initialData }: EventFormProps) {
           name: formData.name,
           startDate: startDate?.toISOString().split('T')[0],
           endDate: endDate?.toISOString().split('T')[0],
-          city: formData.city,
+          city: formData.city || null,
           country: formData.country,
           website: formData.website || null,
           description: formData.description || null,
@@ -285,7 +285,6 @@ export default function EventForm({ initialData }: EventFormProps) {
               name="city"
               value={formData.city}
               onChange={handleInputChange}
-              required
               className="bg-secondary border-border"
             />
           </div>
@@ -372,7 +371,6 @@ export default function EventForm({ initialData }: EventFormProps) {
             value={formData.description}
             onChange={handleInputChange}
             rows={5}
-            required
             className="bg-secondary border-border"
           />
         </div>
