@@ -113,6 +113,7 @@ export default function DiscountCodes({ festivalId }: { festivalId: string }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token}`,
         },
         body: JSON.stringify({
           isUpvote,

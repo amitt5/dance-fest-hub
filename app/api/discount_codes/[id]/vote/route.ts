@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(
@@ -7,13 +6,30 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    const token = request.headers.get('Authorization')?.replace('Bearer ', '')
+
+    if (!token) {
+      return NextResponse.json({ error: 'Missing token' }, { status: 401 })
+    }
+    
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, // must be set securely (server only)
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      }
+    )
     
     const {
-      data: { session },
-    } = await supabase.auth.getSession()
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
 
-    if (!session || !session.user) {
+    if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
