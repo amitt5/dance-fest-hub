@@ -35,7 +35,7 @@ export async function POST(
     
     const { isUpvote } = await request.json();
     const discountCodeId = params.id;
-    
+    console.log('isUpvote', isUpvote, typeof isUpvote)
     if (typeof isUpvote !== 'boolean') {
       return NextResponse.json({ error: 'Invalid vote type' }, { status: 400 });
     }
@@ -51,7 +51,36 @@ export async function POST(
       return NextResponse.json({ error: 'Discount code not found' }, { status: 404 });
     }
     
-    // Update the vote count
+    // Check if the user has already voted on this discount code
+    const { data: existingVote, error: voteCheckError } = await supabase
+      .from('discount_code_votes')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('discount_code_id', discountCodeId)
+      .single();
+    
+    if (voteCheckError && voteCheckError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+      console.error('Error checking existing vote:', voteCheckError);
+      return NextResponse.json({ error: 'Failed to check existing vote' }, { status: 500 });
+    }
+    
+    // Start a transaction to update both tables
+    const { data: voteData, error: voteError } = await supabase
+      .from('discount_code_votes')
+      .insert({
+        user_id: user.id,
+        discount_code_id: discountCodeId,
+        vote_type: isUpvote ? 'upvote' : 'downvote'
+      })
+      .select()
+      .single();
+    
+    if (voteError) {
+      console.error('Error creating vote record:', voteError);
+      return NextResponse.json({ error: 'Failed to record vote' }, { status: 500 });
+    }
+    
+    // Update the vote count on the discount code
     const updateField = isUpvote ? 'upvotes' : 'downvotes';
     const { data, error } = await supabase
       .from('discount_codes')
@@ -61,11 +90,14 @@ export async function POST(
       .single();
     
     if (error) {
-      console.error('Error updating vote:', error);
-      return NextResponse.json({ error: 'Failed to update vote' }, { status: 500 });
+      console.error('Error updating vote count:', error);
+      return NextResponse.json({ error: 'Failed to update vote count' }, { status: 500 });
     }
     
-    return NextResponse.json(data);
+    return NextResponse.json({
+      ...data,
+      vote: voteData
+    });
   } catch (error) {
     console.error('Error in POST /api/discount_codes/[id]/vote:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
